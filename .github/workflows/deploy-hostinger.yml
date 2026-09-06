@@ -1,0 +1,94 @@
+name: Test & deploy MAZ Heights theme to Hostinger
+
+# Only runs on changes under wp-theme/maz-heights/, so editing chats/ or
+# project/ (the design handoff bundle) never triggers a test run or a
+# deploy. workflow_dispatch lets you re-run a deploy on demand (e.g.
+# after rotating a secret) without needing an empty commit.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wp-theme/maz-heights/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-theme/maz-heights/**'
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    name: Run theme test suites
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wp-theme/maz-heights
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Install PHP test dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHPUnit (76 tests)
+        run: composer test
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: wp-theme/maz-heights/package-lock.json
+
+      - name: Install JS test dependencies
+        run: npm ci
+
+      - name: Run Jest (26 tests)
+        run: npm test
+
+  deploy:
+    name: Deploy to Hostinger over SFTP
+    needs: test
+    # Only deploy on an actual push to main — never on a pull request,
+    # and never if the test job above failed.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build a clean, production-only copy of the theme
+        # Mirrors the exclusions in the theme's own .gitignore: vendor/,
+        # node_modules/, tests/ and the dev tooling configs are useful
+        # for developing the theme but have no reason to exist on the
+        # live server, so they're left out of what actually gets
+        # uploaded rather than deployed and then ignored.
+        run: |
+          mkdir -p /tmp/deploy/maz-heights
+          rsync -a wp-theme/maz-heights/ /tmp/deploy/maz-heights/ \
+            --exclude 'vendor' \
+            --exclude 'node_modules' \
+            --exclude 'tests' \
+            --exclude '.git*' \
+            --exclude 'composer.json' \
+            --exclude 'composer.lock' \
+            --exclude 'package.json' \
+            --exclude 'package-lock.json' \
+            --exclude 'phpunit.xml' \
+            --exclude '.phpunit.cache'
+
+      - name: Upload theme via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          username: ${{ secrets.HOSTINGER_SFTP_USERNAME }}
+          server: ${{ secrets.HOSTINGER_SFTP_HOST }}
+          port: ${{ secrets.HOSTINGER_SFTP_PORT }}
+          password: ${{ secrets.HOSTINGER_SFTP_PASSWORD }}
+          local_path: '/tmp/deploy/maz-heights/*'
+          # Confirm this path against your own Hostinger account before
+          # the first run — see the deployment guide's "Find your exact
+          # remote path" step. Single-site hPanel accounts are usually
+          # ~/public_html/...; accounts with multiple domains nest each
+          # site under ~/domains/<yourdomain>/public_html/... instead.
+          remote_path: ${{ secrets.HOSTINGER_THEME_PATH }}

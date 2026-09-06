@@ -1,0 +1,21 @@
+{
+  "name": "maz-heights-theme",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Front-end JS for the MAZ Heights WordPress theme (nav toggle, quote form validation + submission).",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "roots": [
+      "<rootDir>/assets/js",
+      "<rootDir>/tests/js"
+    ]
+  }
+}

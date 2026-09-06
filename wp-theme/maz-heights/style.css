@@ -1,0 +1,18 @@
+/*
+Theme Name: MAZ Heights
+Theme URI: https://mazheights.co.uk
+Author: MAZ Heights Ltd
+Description: Custom theme for MAZ Heights, a design-and-build extensions, kitchens and bathrooms contractor in Coventry, UK. Implements the MAZ Heights hi-fi homepage design (graphite / brick / stone palette, Archivo + IBM Plex Sans/Mono).
+Version: 1.0.0
+Requires at least: 6.4
+Requires PHP: 8.0
+Text Domain: maz-heights
+*/
+
+/*
+Design tokens and component styles live in assets/css/style.css so they can be
+linted/built independently of the WordPress theme stylesheet header above.
+This file only needs to exist (with the header comment) for WordPress to
+recognise the theme; functions.php enqueues assets/css/style.css as the
+actual stylesheet.
+*/
