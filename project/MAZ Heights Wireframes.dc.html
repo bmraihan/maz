@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f0eee9;font-family:'Architects Daughter',system-ui,sans-serif}
+a{color:#c2591f}a:hover{color:#8f3f14}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 'Kalam',cursive;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 13px/1.3 'Kalam',cursive;color:rgba(0,0,0,.6)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#c2591f;color:#fff}
+.dv-next{margin:26px 0 0;font:13px/1.6 'Kalam',cursive;color:rgba(0,0,0,.55)}
+</style></helmet>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">MAZ Heights — three homepage directions + core inner screens (desktop, 1000px)</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Homepage — “Proof-first”: big hero photo, quote form in the hero, process high up</div>
+<div class="dv-card" style="width:1000px">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #ddd9d2;background:#fbfaf7">
+    <div style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font:11px 'Kalam',cursive">MZ</div><div style="font:700 16px 'Kalam',cursive">MAZ HEIGHTS</div></div>
+    <div style="display:flex;gap:20px;font-size:13px;color:#5a5650"><span>Extensions</span><span>Kitchens</span><span>Bathrooms</span><span>Our work</span><span>About</span><span>Contact</span></div>
+    <div style="display:flex;align-items:center;gap:12px"><span style="font:700 14px 'Kalam',cursive">024 xxxx xxxx</span><div style="padding:8px 14px;background:#c2591f;color:#fff;border-radius:3px;font-size:12px">Free quote</div></div>
+  </div>
+
+  <div style="position:relative;height:400px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:center;gap:32px;padding:0 40px;box-sizing:border-box">
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+      <div style="font:700 34px/1.15 'Kalam',cursive;color:#1c1c1c;max-width:440px">Extensions, kitchens &amp; bathrooms — built properly in Coventry</div>
+      <div style="font-size:14px;line-height:1.6;color:#4a463f;max-width:400px">One-line promise: design, drawings, build and sign-off handled by one team. Fixed price before we start.</div>
+      <div style="display:flex;gap:12px;align-items:center"><div style="padding:12px 20px;background:#c2591f;color:#fff;border-radius:3px;font-size:14px">Book a free survey</div><div style="padding:12px 20px;border:1.5px solid #3a3733;border-radius:3px;font-size:14px">See our work</div></div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <div style="padding:6px 10px;background:#fff;border:1px solid #ddd9d2;font-size:11px;color:#5a5650">★★★★★ 4.9 Google</div>
+        <div style="padding:6px 10px;background:#fff;border:1px solid #ddd9d2;font-size:11px;color:#5a5650">FMB member</div>
+        <div style="padding:6px 10px;background:#fff;border:1px solid #ddd9d2;font-size:11px;color:#5a5650">10 yr guarantee</div>
+      </div>
+    </div>
+    <div style="width:320px;background:#fff;border:1px solid #ccc7bf;border-radius:6px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 3px 12px rgba(0,0,0,.12)">
+      <div style="font:700 17px 'Kalam',cursive">Get a price in 24 hrs</div>
+      <div style="height:36px;border:1px solid #d6d1c8;border-radius:3px;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#9a948a">Your name</div>
+      <div style="height:36px;border:1px solid #d6d1c8;border-radius:3px;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#9a948a">Phone</div>
+      <div style="height:36px;border:1px solid #d6d1c8;border-radius:3px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12px;color:#9a948a">What do you need? <span>▾</span></div>
+      <div style="height:60px;border:1px solid #d6d1c8;border-radius:3px;padding:8px 10px;font-size:12px;color:#9a948a">A bit about the job…</div>
+      <div style="height:40px;background:#1c1c1c;color:#fff;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:13px">Send enquiry</div>
+      <div style="font-size:10px;color:#8a8479;text-align:center">No obligation · we cover CV1–CV8</div>
+    </div>
+  </div>
+
+  <div style="padding:34px 40px;border-top:1px solid #e5e1da">
+    <div style="font:700 22px 'Kalam',cursive;margin-bottom:4px">How it works</div>
+    <div style="font-size:13px;color:#6a655e;margin-bottom:22px">5 steps, prominent — the trust anchor of the page</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+      <div style="border:1px solid #ddd9d2;border-radius:5px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#c2591f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">1</div><div style="font:700 14px 'Kalam',cursive">Free survey</div><div style="font-size:11px;color:#6a655e;line-height:1.5">We visit, measure, talk budget.</div></div>
+      <div style="border:1px solid #ddd9d2;border-radius:5px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#c2591f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">2</div><div style="font:700 14px 'Kalam',cursive">Design &amp; drawings</div><div style="font-size:11px;color:#6a655e;line-height:1.5">Plans + planning/building regs.</div></div>
+      <div style="border:1px solid #ddd9d2;border-radius:5px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#c2591f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">3</div><div style="font:700 14px 'Kalam',cursive">Fixed quote</div><div style="font-size:11px;color:#6a655e;line-height:1.5">Itemised, no surprises.</div></div>
+      <div style="border:1px solid #ddd9d2;border-radius:5px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#c2591f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">4</div><div style="font:700 14px 'Kalam',cursive">Build</div><div style="font-size:11px;color:#6a655e;line-height:1.5">Weekly updates, tidy site.</div></div>
+      <div style="border:1px solid #ddd9d2;border-radius:5px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:#c2591f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">5</div><div style="font:700 14px 'Kalam',cursive">Sign-off</div><div style="font-size:11px;color:#6a655e;line-height:1.5">Certificates + guarantee.</div></div>
+    </div>
+  </div>
+
+  <div style="padding:34px 40px;background:#faf9f6;border-top:1px solid #e5e1da">
+    <div style="font:700 22px 'Kalam',cursive;margin-bottom:18px">What we do</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+      <div style="border:1px solid #ddd9d2;background:#fff;border-radius:5px;overflow:hidden">
+        <div style="height:140px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:center;justify-content:center;font-size:11px;color:#8a8479">photo · rear extension</div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:7px"><div style="font:700 16px 'Kalam',cursive">Extensions</div><div style="font-size:11px;color:#6a655e;line-height:1.5">Single &amp; double storey, wrap-around, garage conversions.</div><div style="font-size:11px;color:#c2591f">From £xx,xxx →</div></div>
+      </div>
+      <div style="border:1px solid #ddd9d2;background:#fff;border-radius:5px;overflow:hidden">
+        <div style="height:140px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:center;justify-content:center;font-size:11px;color:#8a8479">photo · fitted kitchen</div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:7px"><div style="font:700 16px 'Kalam',cursive">Kitchens</div><div style="font-size:11px;color:#6a655e;line-height:1.5">Full refits, knock-throughs, islands, appliances.</div><div style="font-size:11px;color:#c2591f">From £x,xxx →</div></div>
+      </div>
+      <div style="border:1px solid #ddd9d2;background:#fff;border-radius:5px;overflow:hidden">
+        <div style="height:140px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:center;justify-content:center;font-size:11px;color:#8a8479">photo · bathroom</div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:7px"><div style="font:700 16px 'Kalam',cursive">Bathrooms</div><div style="font-size:11px;color:#6a655e;line-height:1.5">Wet rooms, en-suites, tiling, plumbing, electrics.</div><div style="font-size:11px;color:#c2591f">From £x,xxx →</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:34px 40px;border-top:1px solid #e5e1da">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px"><div style="font:700 22px 'Kalam',cursive">Recent jobs in Coventry</div><div style="font-size:12px;color:#c2591f">View all 40+ projects →</div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div style="height:120px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:#5a5650">Earlsdon · rear ext.</div>
+      <div style="height:120px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:#5a5650">Kenilworth · kitchen</div>
+      <div style="height:120px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:#5a5650">Coundon · bathroom</div>
+      <div style="height:120px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:flex-end;padding:8px;font-size:10px;color:#5a5650">Binley · 2-storey</div>
+    </div>
+  </div>
+
+  <div style="padding:30px 40px;background:#1c1c1c;color:#fff;display:flex;align-items:center;justify-content:space-between">
+    <div><div style="font:700 20px 'Kalam',cursive">Thinking about an extension?</div><div style="font-size:12px;color:#b5b0a7;margin-top:5px">Free survey, honest advice, fixed price.</div></div>
+    <div style="display:flex;gap:12px"><div style="padding:12px 20px;background:#c2591f;border-radius:3px;font-size:13px">Book free survey</div><div style="padding:12px 20px;border:1px solid #6a655e;border-radius:3px;font-size:13px">024 xxxx xxxx</div></div>
+  </div>
+  <div style="padding:20px 40px;background:#111;color:#7a756d;font-size:11px;display:flex;justify-content:space-between"><span>MAZ Heights Ltd · Coventry, UK</span><span>Areas · Privacy · Reviews</span></div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Homepage — “Pick your project”: service-router hero, no form until intent is chosen</div>
+<div class="dv-card" style="width:1000px">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:2px solid #1c1c1c">
+    <div style="font:700 18px 'Kalam',cursive;letter-spacing:.5px">MAZ HEIGHTS</div>
+    <div style="display:flex;gap:22px;font-size:13px;color:#3a3733"><span>Services ▾</span><span>Our work</span><span>Process</span><span>Reviews</span><span>About</span></div>
+    <div style="font:700 15px 'Kalam',cursive">☎ 024 xxxx xxxx</div>
+  </div>
+
+  <div style="padding:44px 40px 36px;text-align:center;background:#faf9f6">
+    <div style="font:700 36px/1.15 'Kalam',cursive;max-width:640px;margin:0 auto 12px">Coventry's extension, kitchen &amp; bathroom builders</div>
+    <div style="font-size:14px;color:#5a5650;max-width:520px;margin:0 auto 28px;line-height:1.6">Start by telling us what you're planning — we'll show you real jobs like yours and a rough price range.</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:780px;margin:0 auto">
+      <div style="border:2px solid #1c1c1c;background:#fff;border-radius:5px;padding:18px;display:flex;flex-direction:column;gap:10px;align-items:center"><div style="width:100%;height:80px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%)"></div><div style="font:700 16px 'Kalam',cursive">Extension</div><div style="font-size:11px;color:#6a655e">£40k–£120k typical</div><div style="font-size:11px;color:#c2591f">Start here →</div></div>
+      <div style="border:1px solid #cfcbc3;background:#fff;border-radius:5px;padding:18px;display:flex;flex-direction:column;gap:10px;align-items:center"><div style="width:100%;height:80px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%)"></div><div style="font:700 16px 'Kalam',cursive">Kitchen</div><div style="font-size:11px;color:#6a655e">£8k–£30k typical</div><div style="font-size:11px;color:#c2591f">Start here →</div></div>
+      <div style="border:1px solid #cfcbc3;background:#fff;border-radius:5px;padding:18px;display:flex;flex-direction:column;gap:10px;align-items:center"><div style="width:100%;height:80px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%)"></div><div style="font:700 16px 'Kalam',cursive">Bathroom</div><div style="font-size:11px;color:#6a655e">£5k–£18k typical</div><div style="font-size:11px;color:#c2591f">Start here →</div></div>
+    </div>
+    <div style="display:flex;gap:26px;justify-content:center;margin-top:26px;font-size:11px;color:#6a655e"><span>✓ 12 years in Coventry</span><span>✓ 40+ completed builds</span><span>✓ FMB &amp; TrustMark</span><span>✓ 10 year guarantee</span></div>
+  </div>
+
+  <div style="display:flex;border-top:1px solid #e5e1da">
+    <div style="flex:1.1;height:300px;background:#eceae5;background-image:linear-gradient(135deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,#cdc8bf 49.6%,#cdc8bf 50.4%,transparent 50.4%);display:flex;align-items:center;justify-content:center;font-size:12px;color:#8a8479">before / after slider</div>
+    <div style="flex:1;padding:34px;display:flex;flex-direction:column;gap:14px;justify-content:center">
+      <div style="font-size:11px;letter-spacing:1.5px;color:#c2591f">FEATURED PROJECT</div>
+      <div style="font:700 24px/1.2 'Kalam',cursive">Wrap-around extension, Earlsdon</div>
+      <div style="font-size:13px;color:#5a5650;line-height:1.6">Two paragraphs of story: what they wanted, what we did, how long it took, what it cost band was.</div>
+      <div style="display:flex;gap:20px;font-size:12px;color:#3a3733"><div><div style="font:700 18px 'Kalam',cursive">14 wks</div>duration</div><div><div style="font:700 18px 'Kalam',cursive">42 m²</div>added</div><div><div style="font:700 18px 'Kalam',cursive">£78k</div>value</div></div>
+      <div style="font-size:12px;color:#c2591f">Read the full case study →</div>
+    </div>
+  </div>
+
+  <div style="padding:34px 40px;background:#1c1c1c;color:#fff">
+    <div style="font:700 22px 'Kalam',cursive;margin-bottom:20px">Our 5-step process</div>
+    <div style="display:flex;align-items:flex-start;gap:0">
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-right:14px;border-top:2px solid #c2591f;padding-top:12px"><div style="font-size:11px;color:#c2591f">STEP 1</div><div style="font:700 15px 'Kalam',cursive">Free survey</div><div style="font-size:11px;color:#b5b0a7;line-height:1.5">Home visit within 5 days.</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-right:14px;border-top:2px solid #4a463f;padding-top:12px"><div style="font-size:11px;color:#8a8479">STEP 2</div><div style="font:700 15px 'Kalam',cursive">Design &amp; drawings</div><div style="font-size:11px;color:#b5b0a7;line-height:1.5">Plans, planning, building regs.</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-right:14px;border-top:2px solid #4a463f;padding-top:12px"><div style="font-size:11px;color:#8a8479">STEP 3</div><div style="font:700 15px 'Kalam',cursive">Fixed written quote</div><div style="font-size:11px;color:#b5b0a7;line-height:1.5">Itemised and staged.</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-right:14px;border-top:2px solid #4a463f;padding-top:12px"><div style="font-size:11px;color:#8a8479">STEP 4</div><div style="font:700 15px 'Kalam',cursive">We build</div><div style="font-size:11px;color:#b5b0a7;line-height:1.5">One site manager, weekly report.</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #4a463f;padding-top:12px"><div style="font-size:11px;color:#8a8479">STEP 5</div><div style="font:700 15px 'Kalam',cursive">Handover</div><div style="font-size:11px;color:#b5b0a7;line-height:1.5">Certificates + 10 yr guarantee.</div></div>
+    </div>
+  </div>
+
+  <div style="padding:34px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+    <div style="border-left:3px solid #c2591f;padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px">★★★★★</div><div style="font-size:12px;color:#3a3733;line-height:1.6">Short quote from a customer — two or three lines, specific about the job.</div><div style="font-size:11px;color:#8a8479">— Name, Earlsdon · Google</div></div>
+    <div style="border-left:3px solid #c2591f;padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px">★★★★★</div><div style="font-size:12px;color:#3a3733;line-height:1.6">Short quote from a customer — two or three lines, specific about the job.</div><div style="font-size:11px;color:#8a8479">— Name, Coundon · Checkatrade</div></div>
+    <div style="border-left:3px solid #c2591f;padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px">★★★★★</div><div style="font-size:12px;color:#3a3733;line-height:1.6">Short quote from a customer — two or three lines, specific about the job.</div><div style="font-size:11px;color:#8a8479">— Name, Kenilworth · Google</div></div>
+  </div>
+
+  <div style="padding:24px 40px;background:#faf9f6;border-top:1px solid #e5e1da;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:13px;color:#3a3733">Covering Coventry, Kenilworth, Leamington, Nuneaton, Rugby &amp; Warwickshire</div>
+    <div style="padding:11px 18px;background:#c2591f;color:#fff;border-radius:3px;font-size:13px">Get your free quote</div>
+  </div>
+</div>
+</div>
+
+<div class="dv-opt" id="1c">
+<invoke name="dc_write_placeholder"></invoke>
+</div>
+
+</div>
+</section>
+</x-dc>
+</body>
+</html>
