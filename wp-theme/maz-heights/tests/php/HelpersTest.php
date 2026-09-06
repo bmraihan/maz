@@ -62,6 +62,70 @@ final class HelpersTest extends TestCase {
 		$this->assertSame( \maz_heights_business_defaults()['phone'], $info['phone'] );
 	}
 
+	public function test_hero_defaults_has_no_image_and_matches_approved_copy(): void {
+		$defaults = \maz_heights_hero_defaults();
+
+		$this->assertSame( '', $defaults['image'] );
+		$this->assertSame( 'Designed, drawn and built by one team.', $defaults['heading'] );
+		$this->assertSame(
+			array( 'image', 'eyebrow', 'heading', 'subtext', 'primary_label', 'secondary_label' ),
+			array_keys( $defaults )
+		);
+	}
+
+	public function test_hero_content_falls_back_to_defaults_when_nothing_saved(): void {
+		Functions\when( 'get_theme_mod' )->justReturn( false );
+
+		$this->assertSame( \maz_heights_hero_defaults(), \maz_heights_hero_content() );
+	}
+
+	public function test_hero_content_overrides_image_and_heading_independently(): void {
+		Functions\when( 'get_theme_mod' )->alias( function ( $key ) {
+			if ( 'maz_hero_image' === $key ) {
+				return 'https://mazheights.test/wp-content/uploads/hero.jpg';
+			}
+			if ( 'maz_hero_heading' === $key ) {
+				return 'A custom headline';
+			}
+			return false;
+		} );
+
+		$hero = \maz_heights_hero_content();
+
+		$this->assertSame( 'https://mazheights.test/wp-content/uploads/hero.jpg', $hero['image'] );
+		$this->assertSame( 'A custom headline', $hero['heading'] );
+		$this->assertSame( \maz_heights_hero_defaults()['subtext'], $hero['subtext'] );
+	}
+
+	public function test_cta_band_defaults_has_no_image_and_matches_approved_copy(): void {
+		$defaults = \maz_heights_cta_band_defaults();
+
+		$this->assertSame( '', $defaults['image'] );
+		$this->assertSame(
+			array( 'image', 'heading', 'subtext', 'primary_label' ),
+			array_keys( $defaults )
+		);
+	}
+
+	public function test_cta_band_content_overrides_defaults_with_string_mods(): void {
+		Functions\when( 'get_theme_mod' )->alias( function ( $key ) {
+			return 'maz_cta_heading' === $key ? 'Book now' : false;
+		} );
+
+		$cta = \maz_heights_cta_band_content();
+
+		$this->assertSame( 'Book now', $cta['heading'] );
+		$this->assertSame( \maz_heights_cta_band_defaults()['subtext'], $cta['subtext'] );
+	}
+
+	public function test_theme_mod_overrides_ignores_non_string_mods(): void {
+		Functions\when( 'get_theme_mod' )->justReturn( false );
+
+		$result = \maz_heights_theme_mod_overrides( array( 'a' => 'default-a' ), 'prefix_' );
+
+		$this->assertSame( array( 'a' => 'default-a' ), $result );
+	}
+
 	public function test_format_price_from_formats_positive_amount(): void {
 		$this->assertSame( 'FROM £45,000', \maz_heights_format_price_from( 45000 ) );
 	}

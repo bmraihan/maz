@@ -244,17 +244,20 @@ function maz_heights_placeholder_data_uri( $label ) {
  */
 function maz_heights_render_cta_band( $heading = '', $body = '' ) {
 	$business = maz_heights_business_info();
-	$heading  = $heading ? $heading : __( 'Planning an extension for next spring? Book the survey now.', 'maz-heights' );
-	$body     = $body ? $body : __( 'Design and planning take eight to twelve weeks before a spade goes in the ground.', 'maz-heights' );
+	$content  = maz_heights_cta_band_content();
+	$heading  = $heading ? $heading : $content['heading'];
+	$body     = $body ? $body : $content['subtext'];
+	$class    = 'cta-band' . ( $content['image'] ? ' cta-band--has-image' : '' );
+	$style    = $content['image'] ? ' style="background-image:url(\'' . esc_url( $content['image'] ) . '\')"' : '';
 	?>
-	<section class="cta-band">
+	<section class="<?php echo esc_attr( $class ); ?>"<?php echo $style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_url() above. ?>>
 		<div class="wrap cta-band__inner">
 			<div class="cta-band__copy">
 				<h2><?php echo esc_html( $heading ); ?></h2>
 				<p><?php echo esc_html( $body ); ?></p>
 			</div>
 			<div class="cta-band__actions">
-				<a class="btn btn--dark" href="<?php echo esc_url( home_url( '/#quote' ) ); ?>"><?php esc_html_e( 'Book a free survey', 'maz-heights' ); ?></a>
+				<a class="btn btn--dark" href="<?php echo esc_url( home_url( '/#quote' ) ); ?>"><?php echo esc_html( $content['primary_label'] ); ?></a>
 				<a class="btn btn--outline-light" href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $business['phone'] ) ); ?>"><?php echo esc_html( $business['phone'] ); ?></a>
 			</div>
 		</div>

@@ -42,6 +42,17 @@ Heights Website.dc.html`, `chats/chat1.md`).
   the homepage anchors. Edit it anytime at *Appearance → Menus*; if a
   menu is ever unassigned from "Primary Navigation," the header falls
   back to the same links rendered by `inc/nav-fallback.php`.
+- **Homepage hero** (background photo, eyebrow, headline, subtext, and
+  both button labels) and the **CTA band** (background photo, heading,
+  subtext, button label — shared by the homepage, every case study and
+  every service page) are editable at *Appearance → Customize →
+  Homepage Hero* / *CTA Band*. Both start with no photo, matching the
+  approved design's flat graphite/brick backgrounds exactly; adding one
+  automatically gets a dark (hero) or brick-coloured (CTA band) overlay
+  so the white text stays readable regardless of the photo. The
+  anchors the buttons link to (`#quote`, `#work`) aren't editable here
+  — only their labels are — so a typo in wp-admin can't turn a button
+  into a dead link.
 - **Photo placeholders**: the design's grey "PHOTO · …" boxes are
   rendered as branded inline-SVG graphics (`maz_heights_placeholder_svg()`
   in `inc/template-tags.php`) rather than stock photography — the

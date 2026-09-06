@@ -14,24 +14,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 get_header();
 
 $maz_business  = maz_heights_business_info();
+$maz_hero      = maz_heights_hero_content();
 $maz_services  = maz_heights_get_services();
 $maz_projects  = maz_heights_get_projects();
 $maz_price_rows = maz_heights_price_guide_rows();
 $maz_testimonials = maz_heights_get_testimonials();
+
+$maz_hero_class = 'hero' . ( $maz_hero['image'] ? ' hero--has-image' : '' );
+$maz_hero_style = $maz_hero['image'] ? ' style="background-image:url(\'' . esc_url( $maz_hero['image'] ) . '\')"' : '';
 ?>
 
-<section class="hero">
+<section class="<?php echo esc_attr( $maz_hero_class ); ?>"<?php echo $maz_hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_url() above. ?>>
 	<div class="wrap hero__grid">
 		<div class="hero__copy">
 			<div class="hero__eyebrow">
 				<span class="hero__eyebrow-rule"></span>
-				<span><?php esc_html_e( 'EXTENSIONS · KITCHENS · BATHROOMS', 'maz-heights' ); ?></span>
+				<span><?php echo esc_html( $maz_hero['eyebrow'] ); ?></span>
 			</div>
-			<h1><?php esc_html_e( 'Designed, drawn and built by one team.', 'maz-heights' ); ?></h1>
-			<p><?php esc_html_e( 'We handle the design, the drawings, the planning and the build — so you deal with one company from first sketch to final certificate. Fixed written price before anyone lifts a tool.', 'maz-heights' ); ?></p>
+			<h1><?php echo esc_html( $maz_hero['heading'] ); ?></h1>
+			<p><?php echo esc_html( $maz_hero['subtext'] ); ?></p>
 			<div class="hero__actions">
-				<a class="btn btn--brick" href="<?php echo esc_url( home_url( '/#quote' ) ); ?>"><?php esc_html_e( 'Book a free survey', 'maz-heights' ); ?></a>
-				<a class="btn btn--outline-dark" href="<?php echo esc_url( home_url( '/#work' ) ); ?>"><?php esc_html_e( 'See recent builds', 'maz-heights' ); ?></a>
+				<a class="btn btn--brick" href="<?php echo esc_url( home_url( '/#quote' ) ); ?>"><?php echo esc_html( $maz_hero['primary_label'] ); ?></a>
+				<a class="btn btn--outline-dark" href="<?php echo esc_url( home_url( '/#work' ) ); ?>"><?php echo esc_html( $maz_hero['secondary_label'] ); ?></a>
 			</div>
 			<div class="hero__stats">
 				<div class="stat">

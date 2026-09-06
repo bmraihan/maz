@@ -191,6 +191,12 @@ button { font: inherit; cursor: pointer; }
 
 /* ---- Hero ---- */
 .hero { position: relative; background: var(--graphite); color: #fff; overflow: hidden; }
+.hero--has-image { background-size: cover; background-position: center; }
+.hero--has-image::before {
+	content: ''; position: absolute; inset: 0; z-index: 0;
+	background: linear-gradient(100deg, rgba(16,24,32,.94) 0%, rgba(16,24,32,.88) 45%, rgba(16,24,32,.72) 100%);
+}
+.hero--has-image .hero__grid { position: relative; z-index: 1; }
 .hero__grid {
 	display: grid;
 	grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
@@ -389,7 +395,10 @@ button { font: inherit; cursor: pointer; }
 }
 
 /* ---- CTA band ---- */
-.cta-band { background: var(--brick); color: #fff; padding: 64px 0; }
+.cta-band { position: relative; background: var(--brick); color: #fff; padding: 64px 0; }
+.cta-band--has-image { background-size: cover; background-position: center; }
+.cta-band--has-image::before { content: ''; position: absolute; inset: 0; z-index: 0; background: rgba(180,85,42,.86); }
+.cta-band--has-image .cta-band__inner { position: relative; z-index: 1; }
 .cta-band__inner { display: flex; flex-wrap: wrap; gap: 32px; align-items: center; justify-content: space-between; }
 .cta-band__copy { max-width: 52ch; }
 .cta-band__copy h2 { font: 800 clamp(26px, 2.6vw, 34px)/1.12 var(--font-display); letter-spacing: -.025em; margin-bottom: 12px; }

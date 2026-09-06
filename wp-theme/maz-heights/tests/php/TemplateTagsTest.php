@@ -15,6 +15,7 @@ final class TemplateTagsTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
+		require_once dirname( __DIR__, 2 ) . '/inc/helpers.php';
 		require_once dirname( __DIR__, 2 ) . '/inc/template-tags.php';
 	}
 
@@ -99,5 +100,45 @@ final class TemplateTagsTest extends TestCase {
 		$url = \maz_heights_post_image_url( 42, 'maz-card', 'PHOTO · TEST' );
 
 		$this->assertSame( 'https://example.test/photo.jpg', $url );
+	}
+
+	public function test_cta_band_renders_default_copy_with_no_image_class_when_unset(): void {
+		Functions\when( 'get_theme_mod' )->justReturn( false );
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/#quote' );
+
+		ob_start();
+		\maz_heights_render_cta_band();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'class="cta-band"', $html );
+		$this->assertStringNotContainsString( 'cta-band--has-image', $html );
+		$this->assertStringNotContainsString( 'background-image', $html );
+		$this->assertStringContainsString( 'Planning an extension for next spring? Book the survey now.', $html );
+	}
+
+	public function test_cta_band_renders_image_class_and_background_when_set(): void {
+		Functions\when( 'get_theme_mod' )->alias( function ( $key ) {
+			return 'maz_cta_image' === $key ? 'https://mazheights.test/wp-content/uploads/site.jpg' : false;
+		} );
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/#quote' );
+
+		ob_start();
+		\maz_heights_render_cta_band();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'cta-band--has-image', $html );
+		$this->assertStringContainsString( "background-image:url('https://mazheights.test/wp-content/uploads/site.jpg')", $html );
+	}
+
+	public function test_cta_band_explicit_arguments_still_override_customizer_content(): void {
+		Functions\when( 'get_theme_mod' )->justReturn( false );
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/#quote' );
+
+		ob_start();
+		\maz_heights_render_cta_band( 'Custom heading', 'Custom body' );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'Custom heading', $html );
+		$this->assertStringContainsString( 'Custom body', $html );
 	}
 }
