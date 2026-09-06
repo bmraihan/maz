@@ -8,11 +8,18 @@
  * On first activation there's nothing in the database yet, so this
  * seeds the exact copy from the approved MAZ Heights Website design —
  * the site looks finished immediately, and every string here is then a
- * real, editable WordPress post rather than hard-coded markup.
+ * real, editable WordPress post rather than hard-coded markup. It also
+ * creates the three service landing pages and a real "Primary Menu"
+ * (assigned to the header's nav location), so Appearance → Menus shows
+ * something editable from the first page load instead of only the
+ * hard-coded fallback in inc/nav-fallback.php.
  *
  * Seeding is idempotent: maz_heights_should_seed() gates it on an
  * option flag, so re-activating the theme (or a stray extra `init`)
- * never creates duplicate posts.
+ * never creates duplicate posts. The menu step has its own, narrower
+ * guard (maz_heights_should_assign_primary_menu()) that also backs off
+ * if a site admin has already assigned something to the `primary`
+ * location by the time this runs.
  *
  * @package MazHeights
  */
@@ -208,7 +215,8 @@ function maz_heights_seed_content() {
 		}
 	}
 
-	maz_heights_seed_service_landing_pages();
+	$service_page_ids = maz_heights_seed_service_landing_pages();
+	maz_heights_seed_primary_menu( $service_page_ids );
 }
 
 /**
@@ -222,24 +230,142 @@ function maz_heights_seed_content() {
  * finance options etc.) were called out in the design handoff as
  * "next" and were never designed, so this seeds a placeholder landing
  * page rather than guessing at content that was never approved.
+ *
+ * @return array<string,int> Service slug => page ID, for maz_heights_seed_primary_menu().
  */
 function maz_heights_seed_service_landing_pages() {
+	$page_ids = array();
+
 	foreach ( maz_heights_seed_data()['services'] as $service ) {
-		$slug    = sanitize_title( $service['title'] );
+		$slug     = sanitize_title( $service['title'] );
 		$existing = get_page_by_path( $slug, OBJECT, 'page' );
 
 		if ( $existing ) {
+			$page_ids[ $slug ] = $existing->ID;
 			continue;
 		}
 
-		wp_insert_post( array(
+		$page_id = wp_insert_post( array(
 			'post_type'    => 'page',
 			'post_status'  => 'publish',
 			'post_title'   => $service['title'],
 			'post_name'    => $slug,
 			'page_template' => 'page-templates/service-landing.php',
 		), true );
+
+		if ( ! is_wp_error( $page_id ) && $page_id ) {
+			$page_ids[ $slug ] = $page_id;
+		}
 	}
+
+	return $page_ids;
+}
+
+/**
+ * The default "Primary Navigation" menu's items, in display order.
+ *
+ * Mirrors maz_heights_fallback_nav_items() (inc/nav-fallback.php) but
+ * points Extensions/Kitchens/Bathrooms at their real seeded pages
+ * instead of the homepage's #services anchor, now that those pages
+ * exist. Pure data — no WP calls beyond home_url(), which is trivial
+ * to stub — so the item list and its order are unit tested directly
+ * in tests/php/SeedContentTest.php without touching the database.
+ *
+ * @param array<string,int> $service_page_ids Service slug => page ID, from maz_heights_seed_service_landing_pages().
+ * @return array<int,array<string,mixed>> wp_update_nav_menu_item()-shaped item specs, in menu order.
+ */
+function maz_heights_primary_menu_items( array $service_page_ids ) {
+	$items = array();
+
+	foreach ( array( 'extensions' => 'Extensions', 'kitchens' => 'Kitchens', 'bathrooms' => 'Bathrooms' ) as $slug => $title ) {
+		if ( empty( $service_page_ids[ $slug ] ) ) {
+			continue;
+		}
+
+		$items[] = array(
+			'title'  => $title,
+			'type'   => 'post_type',
+			'object' => 'page',
+			'object_id' => $service_page_ids[ $slug ],
+		);
+	}
+
+	$items[] = array(
+		'title'  => 'Our work',
+		'type'   => 'post_type_archive',
+		'object' => 'maz_project',
+	);
+	$items[] = array(
+		'title' => 'Process',
+		'type'  => 'custom',
+		'url'   => home_url( '/#process' ),
+	);
+	$items[] = array(
+		'title' => 'Prices',
+		'type'  => 'custom',
+		'url'   => home_url( '/#prices' ),
+	);
+
+	return $items;
+}
+
+/**
+ * Whether it's safe to create and assign the seeded primary menu.
+ *
+ * Only true when nothing is already assigned to the `primary` location
+ * — so if a site admin (or a different seeding path) has already set
+ * one up, this never overwrites their choice.
+ *
+ * @param array<string,int> $existing_locations Current `nav_menu_locations` theme mod (get_theme_mod('nav_menu_locations', array())).
+ * @return bool
+ */
+function maz_heights_should_assign_primary_menu( array $existing_locations ) {
+	return empty( $existing_locations['primary'] );
+}
+
+/**
+ * Create the "Primary Menu" nav menu, populate it, and assign it to
+ * the `primary` theme location — so Appearance → Menus shows a real,
+ * fully editable menu immediately, instead of leaving the header
+ * running on inc/nav-fallback.php's hard-coded fallback until someone
+ * builds one by hand.
+ *
+ * @param array<string,int> $service_page_ids Service slug => page ID, from maz_heights_seed_service_landing_pages().
+ */
+function maz_heights_seed_primary_menu( array $service_page_ids ) {
+	$locations = get_theme_mod( 'nav_menu_locations', array() );
+
+	if ( ! maz_heights_should_assign_primary_menu( $locations ) ) {
+		return;
+	}
+
+	$menu = get_term_by( 'name', 'Primary Menu', 'nav_menu' );
+	$menu_id = $menu ? $menu->term_id : wp_create_nav_menu( 'Primary Menu' );
+
+	if ( is_wp_error( $menu_id ) || ! $menu_id ) {
+		return;
+	}
+
+	foreach ( maz_heights_primary_menu_items( $service_page_ids ) as $position => $item ) {
+		$args = array(
+			'menu-item-title'     => $item['title'],
+			'menu-item-status'    => 'publish',
+			'menu-item-position'  => $position + 1,
+			'menu-item-type'      => $item['type'],
+		);
+
+		if ( 'custom' === $item['type'] ) {
+			$args['menu-item-url'] = $item['url'];
+		} else {
+			$args['menu-item-object']    = $item['object'];
+			$args['menu-item-object-id'] = $item['object_id'] ?? 0;
+		}
+
+		wp_update_nav_menu_item( $menu_id, 0, $args );
+	}
+
+	$locations['primary'] = $menu_id;
+	set_theme_mod( 'nav_menu_locations', $locations );
 }
 
 /**

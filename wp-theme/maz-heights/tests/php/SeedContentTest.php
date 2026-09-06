@@ -7,6 +7,8 @@
 
 namespace MazHeights\Tests;
 
+use Brain\Monkey\Functions;
+
 require_once __DIR__ . '/TestCase.php';
 
 final class SeedContentTest extends TestCase {
@@ -67,5 +69,74 @@ final class SeedContentTest extends TestCase {
 				$this->assertContains( $meta_key, $registered, "$meta_key is seeded but not registered" );
 			}
 		}
+	}
+
+	public function test_primary_menu_items_links_each_service_to_its_seeded_page(): void {
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/' );
+
+		$items = \maz_heights_primary_menu_items( array(
+			'extensions' => 11,
+			'kitchens'   => 12,
+			'bathrooms'  => 13,
+		) );
+
+		$this->assertSame(
+			array( 'Extensions', 'Kitchens', 'Bathrooms', 'Our work', 'Process', 'Prices' ),
+			array_column( $items, 'title' )
+		);
+
+		$this->assertSame( 'post_type', $items[0]['type'] );
+		$this->assertSame( 'page', $items[0]['object'] );
+		$this->assertSame( 11, $items[0]['object_id'] );
+	}
+
+	public function test_primary_menu_items_skips_a_service_with_no_seeded_page(): void {
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/' );
+
+		// Kitchens missing — e.g. its page failed to insert, or was deleted.
+		$items = \maz_heights_primary_menu_items( array(
+			'extensions' => 11,
+			'bathrooms'  => 13,
+		) );
+
+		$this->assertSame(
+			array( 'Extensions', 'Bathrooms', 'Our work', 'Process', 'Prices' ),
+			array_column( $items, 'title' )
+		);
+	}
+
+	public function test_primary_menu_items_our_work_is_a_post_type_archive_link(): void {
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/' );
+
+		$items = \maz_heights_primary_menu_items( array() );
+		$our_work = array_values( array_filter( $items, static fn( $item ) => 'Our work' === $item['title'] ) )[0];
+
+		$this->assertSame( 'post_type_archive', $our_work['type'] );
+		$this->assertSame( 'maz_project', $our_work['object'] );
+	}
+
+	public function test_primary_menu_items_process_and_prices_are_homepage_anchors(): void {
+		Functions\when( 'home_url' )->alias( static fn( $path = '' ) => 'https://mazheights.test' . $path );
+
+		$items = \maz_heights_primary_menu_items( array() );
+		$by_title = array_combine( array_column( $items, 'title' ), $items );
+
+		$this->assertSame( 'custom', $by_title['Process']['type'] );
+		$this->assertSame( 'https://mazheights.test/#process', $by_title['Process']['url'] );
+		$this->assertSame( 'https://mazheights.test/#prices', $by_title['Prices']['url'] );
+	}
+
+	public function test_should_assign_primary_menu_is_true_when_location_empty(): void {
+		$this->assertTrue( \maz_heights_should_assign_primary_menu( array() ) );
+		$this->assertTrue( \maz_heights_should_assign_primary_menu( array( 'primary' => 0 ) ) );
+	}
+
+	public function test_should_assign_primary_menu_is_false_once_something_is_assigned(): void {
+		$this->assertFalse( \maz_heights_should_assign_primary_menu( array( 'primary' => 7 ) ) );
+	}
+
+	public function test_should_assign_primary_menu_ignores_other_locations(): void {
+		// A footer menu being assigned shouldn't block seeding the primary one.
+		$this->assertTrue( \maz_heights_should_assign_primary_menu( array( 'footer' => 3 ) ) );
 	}
 }

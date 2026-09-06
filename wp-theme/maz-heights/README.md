@@ -35,6 +35,13 @@ Heights Website.dc.html`, `chats/chat1.md`).
 - **Case studies** get a real single template (`single-maz_project.php`)
   and archive (`archive-maz_project.php`) — the "Full case study →" and
   "All N projects →" links in the design go somewhere real.
+- **Primary navigation menu** is seeded as a real, editable WordPress
+  menu ("Primary Menu") and assigned to the header's nav location on
+  first activation — Extensions/Kitchens/Bathrooms link to their real
+  pages, "Our work" to the case-study archive, "Process"/"Prices" to
+  the homepage anchors. Edit it anytime at *Appearance → Menus*; if a
+  menu is ever unassigned from "Primary Navigation," the header falls
+  back to the same links rendered by `inc/nav-fallback.php`.
 - **Photo placeholders**: the design's grey "PHOTO · …" boxes are
   rendered as branded inline-SVG graphics (`maz_heights_placeholder_svg()`
   in `inc/template-tags.php`) rather than stock photography — the
