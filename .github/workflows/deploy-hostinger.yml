@@ -79,7 +79,7 @@ jobs:
             --exclude '.phpunit.cache'
 
       - name: Upload theme via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
           username: ${{ secrets.HOSTINGER_SFTP_USERNAME }}
           server: ${{ secrets.HOSTINGER_SFTP_HOST }}
