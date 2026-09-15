@@ -8,14 +8,25 @@ Heights Website.dc.html`, `chats/chat1.md`).
 ## What's built
 
 - **Homepage** (`front-page.php`) — pixel-matches the approved design:
-  sticky header, hero with inline quote form, 3 services, 5-stage
-  process, recent work, price guide, testimonials + accreditations,
-  CTA band, footer.
+  sticky header, hero with inline quote form, a fully dynamic services
+  grid, 5-stage process, recent work, price guide, testimonials +
+  accreditations, CTA band, footer.
 - **Services, Projects (case studies) and Testimonials** are WordPress
   custom post types (`maz_service`, `maz_project`, `maz_testimonial`),
   not hard-coded markup — a non-developer can add/edit them from
-  wp-admin. On first activation they're seeded with the exact copy
-  from the design, so the site looks finished immediately.
+  wp-admin. On first activation they're seeded with 8 services —
+  Extensions, Kitchens and Bathrooms from the approved design, plus New
+  Builds, Roofing, Landscaping & Gardens, Concrete Laying and Loft
+  Conversions added after launch (placeholder copy/pricing; review and
+  adjust these five the same way you would the original three's photos)
+  — so the site looks finished immediately. **Adding a 9th is just
+  publishing another `maz_service` post in wp-admin**: the homepage
+  grid and footer "Services" column pick it up immediately (both query
+  every published service, never a fixed list), and publishing the
+  post itself triggers `maz_heights_sync_navigation_on_service_save()`
+  (`inc/seed-content.php`), which creates its landing page and adds it
+  to the primary menu automatically — no template or code change
+  needed.
 - **"Get a fixed price" quote form** posts to a **Formspree** endpoint
   you configure at *Appearance → Customize → Quote Form*. It's a real
   `<form>` (works with JS off) progressively enhanced by
@@ -35,13 +46,17 @@ Heights Website.dc.html`, `chats/chat1.md`).
 - **Case studies** get a real single template (`single-maz_project.php`)
   and archive (`archive-maz_project.php`) — the "Full case study →" and
   "All N projects →" links in the design go somewhere real.
-- **Primary navigation menu** is seeded as a real, editable WordPress
-  menu ("Primary Menu") and assigned to the header's nav location on
-  first activation — Extensions/Kitchens/Bathrooms link to their real
-  pages, "Our work" to the case-study archive, "Process"/"Prices" to
-  the homepage anchors. Edit it anytime at *Appearance → Menus*; if a
-  menu is ever unassigned from "Primary Navigation," the header falls
-  back to the same links rendered by `inc/nav-fallback.php`.
+- **Primary navigation menu** is a real, editable WordPress menu
+  ("Primary Menu") assigned to the header's nav location — every
+  service links to its real page, plus "Our work" to the case-study
+  archive and "Process"/"Prices" to the homepage anchors. It's kept in
+  sync automatically (on first activation, and again every time a
+  service is published) rather than only ever built once: a menu item
+  or landing page missing for any published service gets added, while
+  everything already there — including your own edits, reordering, or
+  extra items — is left alone. Edit it anytime at *Appearance → Menus*;
+  if it's ever unassigned from "Primary Navigation" entirely, the
+  header falls back to the static links in `inc/nav-fallback.php`.
 - **Homepage hero** (background photo, eyebrow, headline, subtext, and
   both button labels) and the **CTA band** (background photo, heading,
   subtext, button label — shared by the homepage, every case study and

@@ -44,7 +44,7 @@ function maz_heights_business_defaults() {
 function maz_heights_hero_defaults() {
 	return array(
 		'image'            => '',
-		'eyebrow'          => 'EXTENSIONS · KITCHENS · BATHROOMS',
+		'eyebrow'          => 'EXTENSIONS · NEW BUILDS · ROOFING & MORE',
 		'heading'          => 'Designed, drawn and built by one team.',
 		'subtext'          => 'We handle the design, the drawings, the planning and the build — so you deal with one company from first sketch to final certificate. Fixed written price before anyone lifts a tool.',
 		'primary_label'    => 'Book a free survey',

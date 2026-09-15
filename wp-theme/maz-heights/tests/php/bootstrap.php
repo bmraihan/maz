@@ -16,3 +16,10 @@ require_once dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', sys_get_temp_dir() . '/' );
 }
+
+// WP core constant (wp-includes/wp-db.php) used as the default $output
+// arg of several core lookup functions (e.g. get_page_by_path()) that
+// theme code calls directly rather than through a Brain Monkey stub.
+if ( ! defined( 'OBJECT' ) ) {
+	define( 'OBJECT', 'OBJECT' );
+}

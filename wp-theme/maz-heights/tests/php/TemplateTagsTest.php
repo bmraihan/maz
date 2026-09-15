@@ -130,6 +130,20 @@ final class TemplateTagsTest extends TestCase {
 		$this->assertStringContainsString( "background-image:url('https://mazheights.test/wp-content/uploads/site.jpg')", $html );
 	}
 
+	public function test_service_landing_page_url_uses_the_real_page_when_it_exists(): void {
+		Functions\when( 'get_page_by_path' )->justReturn( (object) array( 'ID' => 9 ) );
+		Functions\when( 'get_permalink' )->justReturn( 'https://mazheights.test/roofing/' );
+
+		$this->assertSame( 'https://mazheights.test/roofing/', \maz_heights_service_landing_page_url( 'Roofing' ) );
+	}
+
+	public function test_service_landing_page_url_falls_back_to_services_anchor_when_page_missing(): void {
+		Functions\when( 'get_page_by_path' )->justReturn( null );
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/#services' );
+
+		$this->assertSame( 'https://mazheights.test/#services', \maz_heights_service_landing_page_url( 'Roofing' ) );
+	}
+
 	public function test_cta_band_explicit_arguments_still_override_customizer_content(): void {
 		Functions\when( 'get_theme_mod' )->justReturn( false );
 		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/#quote' );

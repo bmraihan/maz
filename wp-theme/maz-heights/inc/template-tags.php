@@ -266,6 +266,19 @@ function maz_heights_render_cta_band( $heading = '', $body = '' ) {
 }
 
 /**
+ * A service's real landing page URL, falling back to the homepage
+ * services anchor if that page hasn't been seeded (or was deleted).
+ *
+ * @param string $service_title Service post title, e.g. "Roofing".
+ * @return string
+ */
+function maz_heights_service_landing_page_url( $service_title ) {
+	$page = get_page_by_path( sanitize_title( $service_title ), OBJECT, 'page' );
+
+	return $page ? get_permalink( $page ) : home_url( '/#services' );
+}
+
+/**
  * Trust badges shown in the top utility bar.
  *
  * @return string[]

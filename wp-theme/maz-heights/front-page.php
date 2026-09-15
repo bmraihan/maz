@@ -69,9 +69,9 @@ $maz_hero_style = $maz_hero['image'] ? ' style="background-image:url(\'' . esc_u
 		<div class="section-head">
 			<div>
 				<div class="eyebrow"><?php esc_html_e( 'WHAT WE DO', 'maz-heights' ); ?></div>
-				<h2><?php esc_html_e( 'Three things, done to a standard', 'maz-heights' ); ?></h2>
+				<h2><?php esc_html_e( 'What we do, done to a standard', 'maz-heights' ); ?></h2>
 			</div>
-			<p class="section-head__lede"><?php esc_html_e( "We don't take on everything. Extensions, kitchens and bathrooms are what we build week in, week out — including the structural work most fitters subcontract out.", 'maz-heights' ); ?></p>
+			<p class="section-head__lede"><?php esc_html_e( 'From extensions to landscaping, this is what we build week in, week out — including the structural work most contractors subcontract out.', 'maz-heights' ); ?></p>
 		</div>
 
 		<div class="service-grid">

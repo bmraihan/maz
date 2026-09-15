@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $maz_business = maz_heights_business_info();
+$maz_footer_services = maz_heights_get_services();
 ?>
 </main>
 
@@ -23,15 +24,14 @@ $maz_business = maz_heights_business_info();
 				</svg>
 				<span class="footer-brand__name"><?php bloginfo( 'name' ); ?></span>
 			</div>
-			<p><?php esc_html_e( 'Design-and-build contractor for extensions, kitchens and bathrooms across Coventry and Warwickshire.', 'maz-heights' ); ?></p>
+			<p><?php esc_html_e( 'Design-and-build contractor for extensions, new builds, roofing, landscaping and more across Coventry and Warwickshire.', 'maz-heights' ); ?></p>
 		</div>
 
 		<div class="footer-col">
 			<div class="footer-col__heading"><?php esc_html_e( 'Services', 'maz-heights' ); ?></div>
-			<a href="<?php echo esc_url( home_url( '/#services' ) ); ?>"><?php esc_html_e( 'Extensions', 'maz-heights' ); ?></a>
-			<a href="<?php echo esc_url( home_url( '/#services' ) ); ?>"><?php esc_html_e( 'Kitchens', 'maz-heights' ); ?></a>
-			<a href="<?php echo esc_url( home_url( '/#services' ) ); ?>"><?php esc_html_e( 'Bathrooms & wet rooms', 'maz-heights' ); ?></a>
-			<a href="<?php echo esc_url( home_url( '/#services' ) ); ?>"><?php esc_html_e( 'Garage & loft conversions', 'maz-heights' ); ?></a>
+			<?php foreach ( $maz_footer_services as $maz_footer_service ) : ?>
+				<a href="<?php echo esc_url( maz_heights_service_landing_page_url( $maz_footer_service->post_title ) ); ?>"><?php echo esc_html( $maz_footer_service->post_title ); ?></a>
+			<?php endforeach; ?>
 		</div>
 
 		<div class="footer-col">
