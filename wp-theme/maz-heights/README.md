@@ -47,16 +47,31 @@ Heights Website.dc.html`, `chats/chat1.md`).
   and archive (`archive-maz_project.php`) — the "Full case study →" and
   "All N projects →" links in the design go somewhere real.
 - **Primary navigation menu** is a real, editable WordPress menu
-  ("Primary Menu") assigned to the header's nav location — every
-  service links to its real page, plus "Our work" to the case-study
-  archive and "Process"/"Prices" to the homepage anchors. It's kept in
-  sync automatically (on first activation, and again every time a
-  service is published) rather than only ever built once: a menu item
-  or landing page missing for any published service gets added, while
+  ("Primary Menu") assigned to the header's nav location. The top level
+  stays at exactly four items — **Services ▾** (a dropdown; hover or
+  focus to reveal every service, each linking to its real page),
+  **Our work**, **Process**, **Prices** — regardless of how many
+  services exist, rather than growing one flat entry per service (that
+  looked fine at 3, but turned into a wrapping wall of text once more
+  categories were added — see the fix below). It's kept in sync
+  automatically (on first activation, and again every time a service
+  is published) rather than only ever built once: a menu item or
+  landing page missing for any published service gets added, while
   everything already there — including your own edits, reordering, or
   extra items — is left alone. Edit it anytime at *Appearance → Menus*;
   if it's ever unassigned from "Primary Navigation" entirely, the
   header falls back to the static links in `inc/nav-fallback.php`.
+
+  **If you saw a duplicated, run-on nav** (e.g. one service repeated
+  several times) on a site running an earlier build of this theme:
+  that was a real bug — WordPress round-trips a menu title containing
+  `&` (only "Landscaping & Gardens" was affected) as an HTML entity, so
+  a plain string comparison never recognised it as already present and
+  re-added it on every sync. Both that and the flat-list layout are
+  fixed as of this version, and the fix is self-healing: visiting the
+  site once (any page load triggers WordPress's `init`) de-duplicates
+  the menu and regroups services under "Services" automatically —
+  nothing to click, no need to touch Appearance → Menus by hand.
 - **Homepage hero** (background photo, eyebrow, headline, subtext, and
   both button labels) and the **CTA band** (background photo, heading,
   subtext, button label — shared by the homepage, every case study and

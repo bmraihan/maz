@@ -82,6 +82,17 @@ abstract class TestCase extends PHPUnitTestCase {
 			'number_format_i18n' => function ( $number ) {
 				return number_format( (float) $number );
 			},
+			'wp_specialchars_decode' => function ( $text ) {
+				return html_entity_decode( (string) $text, ENT_QUOTES, 'UTF-8' );
+			},
+			// Real WP_Error objects don't exist in this test environment;
+			// tests that need a failure case pass a plain object instead,
+			// so treating "is it an object at all" as "is it an error" is
+			// sufficient here — every real success value theme code checks
+			// with is_wp_error() is a scalar (an ID, a bool, etc.).
+			'is_wp_error'            => function ( $thing ) {
+				return is_object( $thing );
+			},
 		) );
 	}
 }

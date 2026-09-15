@@ -177,11 +177,57 @@ button { font: inherit; cursor: pointer; }
 .site-nav__links {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px 20px;
+	align-items: center;
+	gap: 8px 28px;
 	justify-content: center;
 	font: 500 14px var(--font-body);
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }
-.site-nav__links a { color: var(--text-dark); }
+/* wp_nav_menu()'s real output is <li><a>…</a></li> — a fallback_cb
+   without a real menu assigned yet renders bare <a> tags instead (see
+   inc/nav-fallback.php); both need to lay out identically in this flex
+   row, and neither should show a browser default list-item marker. */
+.site-nav__links > li { list-style: none; margin: 0; position: relative; display: flex; align-items: center; }
+.site-nav__links a { color: var(--text-dark); display: block; padding: 2px 0; }
+
+/* "Services" dropdown */
+.site-nav__links .menu-item-has-children > a::after {
+	content: '▾';
+	display: inline-block;
+	margin-left: 5px;
+	font-size: 10px;
+	color: var(--text-faint);
+}
+.site-nav__links .sub-menu {
+	list-style: none;
+	margin: 0;
+	padding: 8px;
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	background: #fff;
+	border: 1px solid var(--border-light);
+	box-shadow: 0 12px 28px rgba(16, 24, 32, .14);
+	min-width: 220px;
+	display: none;
+	flex-direction: column;
+	gap: 1px;
+	z-index: 30;
+}
+.site-nav__links li:hover > .sub-menu,
+.site-nav__links li:focus-within > .sub-menu {
+	display: flex;
+}
+.site-nav__links .sub-menu li { width: 100%; }
+.site-nav__links .sub-menu a {
+	padding: 10px 12px;
+	font-weight: 500;
+	white-space: nowrap;
+}
+.site-nav__links .sub-menu a:hover { background: var(--stone); color: var(--brick); }
 .site-header__contact { display: flex; align-items: center; gap: 16px; flex: none; }
 .site-header__hours-phone { text-align: right; }
 .site-header__hours { font: 400 10px/1 var(--font-mono); letter-spacing: .14em; color: var(--text-muted); }
@@ -470,6 +516,14 @@ button { font: inherit; cursor: pointer; }
 	}
 	.site-header__inner { justify-content: center; }
 	.site-nav__links { justify-content: flex-start; }
+	/* Centred dropdowns can overflow off-screen once the nav no longer
+	   spans the full header width; anchor to the item's own left edge
+	   instead, and cap the width so it can't push past the viewport. */
+	.site-nav__links .sub-menu {
+		left: 0;
+		transform: none;
+		max-width: calc(100vw - 40px);
+	}
 }
 
 @media (max-width: 560px) {

@@ -119,8 +119,28 @@ final class SeedContentTest extends TestCase {
 		}
 	}
 
-	public function test_primary_menu_items_links_each_service_to_its_seeded_page(): void {
+	public function test_primary_menu_items_top_level_is_just_four_items_regardless_of_service_count(): void {
 		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/' );
+
+		$services = array_map( static fn( $s ) => array( 'title' => $s['title'] ), \maz_heights_seed_data()['services'] );
+		$page_ids = array();
+		foreach ( $services as $i => $service ) {
+			$page_ids[ \sanitize_title( $service['title'] ) ] = 100 + $i;
+		}
+
+		$items = \maz_heights_primary_menu_items( $services, $page_ids );
+
+		// All 8 services collapse into one "Services" parent, so the top
+		// level nav never grows past 4 items no matter how many services
+		// exist — that's the whole point of nesting them.
+		$this->assertSame(
+			array( 'Services', 'Our work', 'Process', 'Prices' ),
+			array_column( $items, 'title' )
+		);
+	}
+
+	public function test_primary_menu_items_nests_every_service_under_services(): void {
+		Functions\when( 'home_url' )->alias( static fn( $path = '' ) => 'https://mazheights.test' . $path );
 
 		$services = array(
 			array( 'title' => 'Extensions' ),
@@ -129,16 +149,19 @@ final class SeedContentTest extends TestCase {
 		);
 		$page_ids = array( 'extensions' => 11, 'kitchens' => 12, 'bathrooms' => 13 );
 
-		$items = \maz_heights_primary_menu_items( $services, $page_ids );
+		$items    = \maz_heights_primary_menu_items( $services, $page_ids );
+		$services_item = $items[0];
 
+		$this->assertSame( 'Services', $services_item['title'] );
+		$this->assertSame( 'custom', $services_item['type'] );
+		$this->assertSame( 'https://mazheights.test/#services', $services_item['url'] );
 		$this->assertSame(
-			array( 'Extensions', 'Kitchens', 'Bathrooms', 'Our work', 'Process', 'Prices' ),
-			array_column( $items, 'title' )
+			array( 'Extensions', 'Kitchens', 'Bathrooms' ),
+			array_column( $services_item['children'], 'title' )
 		);
-
-		$this->assertSame( 'post_type', $items[0]['type'] );
-		$this->assertSame( 'page', $items[0]['object'] );
-		$this->assertSame( 11, $items[0]['object_id'] );
+		$this->assertSame( 'post_type', $services_item['children'][0]['type'] );
+		$this->assertSame( 'page', $services_item['children'][0]['object'] );
+		$this->assertSame( 11, $services_item['children'][0]['object_id'] );
 	}
 
 	public function test_primary_menu_items_skips_a_service_with_no_page_yet(): void {
@@ -154,9 +177,19 @@ final class SeedContentTest extends TestCase {
 		$items = \maz_heights_primary_menu_items( $services, $page_ids );
 
 		$this->assertSame(
-			array( 'Extensions', 'Bathrooms', 'Our work', 'Process', 'Prices' ),
-			array_column( $items, 'title' )
+			array( 'Extensions', 'Bathrooms' ),
+			array_column( $items[0]['children'], 'title' )
 		);
+	}
+
+	public function test_primary_menu_items_omits_services_item_when_no_pages_exist_yet(): void {
+		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/' );
+
+		$services = array( array( 'title' => 'Extensions' ) );
+
+		$items = \maz_heights_primary_menu_items( $services, array() );
+
+		$this->assertSame( array( 'Our work', 'Process', 'Prices' ), array_column( $items, 'title' ) );
 	}
 
 	public function test_primary_menu_items_our_work_is_a_post_type_archive_link(): void {
@@ -180,23 +213,6 @@ final class SeedContentTest extends TestCase {
 		$this->assertSame( 'https://mazheights.test/#prices', $by_title['Prices']['url'] );
 	}
 
-	public function test_primary_menu_items_works_directly_from_seed_data_for_a_fresh_install(): void {
-		Functions\when( 'home_url' )->justReturn( 'https://mazheights.test/' );
-
-		$services = array_map( static fn( $s ) => array( 'title' => $s['title'] ), \maz_heights_seed_data()['services'] );
-		$page_ids = array();
-		foreach ( $services as $i => $service ) {
-			$page_ids[ \sanitize_title( $service['title'] ) ] = 100 + $i;
-		}
-
-		$items = \maz_heights_primary_menu_items( $services, $page_ids );
-
-		$this->assertSame(
-			array( 'Extensions', 'Kitchens', 'Bathrooms', 'New Builds', 'Roofing', 'Landscaping & Gardens', 'Concrete Laying', 'Loft Conversions', 'Our work', 'Process', 'Prices' ),
-			array_column( $items, 'title' )
-		);
-	}
-
 	public function test_should_assign_primary_menu_is_true_when_location_empty(): void {
 		$this->assertTrue( \maz_heights_should_assign_primary_menu( array() ) );
 		$this->assertTrue( \maz_heights_should_assign_primary_menu( array( 'primary' => 0 ) ) );
@@ -211,27 +227,107 @@ final class SeedContentTest extends TestCase {
 		$this->assertTrue( \maz_heights_should_assign_primary_menu( array( 'footer' => 3 ) ) );
 	}
 
-	public function test_missing_menu_items_returns_only_items_not_already_present(): void {
-		$desired = array(
-			array( 'title' => 'Extensions' ),
-			array( 'title' => 'Roofing' ),
-			array( 'title' => 'Our work' ),
+	public function test_upsert_menu_item_returns_the_new_id_on_success(): void {
+		Functions\when( 'wp_update_nav_menu_item' )->justReturn( 55 );
+
+		$id = \maz_heights_upsert_menu_item( 1, array( 'title' => 'Roofing', 'type' => 'custom', 'url' => 'https://mazheights.test/#services' ), 1 );
+
+		$this->assertSame( 55, $id );
+	}
+
+	public function test_upsert_menu_item_returns_zero_on_failure(): void {
+		Functions\when( 'wp_update_nav_menu_item' )->justReturn( (object) array( 'errors' => array() ) );
+
+		$id = \maz_heights_upsert_menu_item( 1, array( 'title' => 'Roofing', 'type' => 'custom', 'url' => 'https://mazheights.test/#services' ), 1 );
+
+		$this->assertSame( 0, $id );
+	}
+
+	public function test_upsert_menu_item_passes_the_parent_id_through(): void {
+		$captured = null;
+		Functions\when( 'wp_update_nav_menu_item' )->alias( function ( $menu_id, $item_id, $args ) use ( &$captured ) {
+			$captured = $args;
+			return 99;
+		} );
+
+		\maz_heights_upsert_menu_item( 1, array( 'title' => 'Extensions', 'type' => 'post_type', 'object' => 'page', 'object_id' => 11 ), 1, 42 );
+
+		$this->assertSame( 42, $captured['menu-item-parent-id'] );
+		$this->assertSame( 'page', $captured['menu-item-object'] );
+		$this->assertSame( 11, $captured['menu-item-object-id'] );
+	}
+
+	public function test_upsert_menu_item_passes_the_existing_db_id_to_update_in_place(): void {
+		$capturedDbId = null;
+		Functions\when( 'wp_update_nav_menu_item' )->alias( function ( $menu_id, $item_id ) use ( &$capturedDbId ) {
+			$capturedDbId = $item_id;
+			return $item_id ?: 77;
+		} );
+
+		\maz_heights_upsert_menu_item( 1, array( 'title' => 'Extensions', 'type' => 'custom', 'url' => 'https://mazheights.test/' ), 1, 0, 123 );
+
+		$this->assertSame( 123, $capturedDbId );
+	}
+
+	/**
+	 * Regression test for the real bug this fixes: "Landscaping & Gardens"
+	 * kept being re-added to the menu on every sync because WordPress
+	 * round-trips a stored menu item title with `&` as `&#038;`/`&amp;`,
+	 * so a raw string comparison against the desired title (with a plain
+	 * `&`) never matched — it looked "missing" forever. Both encoded
+	 * forms must normalise to the exact same string the desired title
+	 * ("Landscaping & Gardens") normalises to.
+	 *
+	 * @dataProvider ampersandEncodingProvider
+	 */
+	public function test_normalize_menu_title_matches_regardless_of_ampersand_encoding( $storedTitle ): void {
+		$this->assertSame(
+			\maz_heights_normalize_menu_title( 'Landscaping & Gardens' ),
+			\maz_heights_normalize_menu_title( $storedTitle )
+		);
+	}
+
+	public function ampersandEncodingProvider(): array {
+		return array(
+			'plain ampersand' => array( 'Landscaping & Gardens' ),
+			'numeric entity'  => array( 'Landscaping &#038; Gardens' ),
+			'named entity'    => array( 'Landscaping &amp; Gardens' ),
+		);
+	}
+
+	public function test_normalize_menu_title_trims_whitespace_too(): void {
+		$this->assertSame( 'Roofing', \maz_heights_normalize_menu_title( '  Roofing  ' ) );
+	}
+
+	public function test_duplicate_menu_item_ids_keeps_first_occurrence_of_each_title(): void {
+		$items = array(
+			array( 'id' => 1, 'title' => 'Extensions' ),
+			array( 'id' => 2, 'title' => 'Landscaping &amp; Gardens' ),
+			array( 'id' => 3, 'title' => 'Roofing' ),
+			array( 'id' => 4, 'title' => 'Landscaping &#038; Gardens' ),
+			array( 'id' => 5, 'title' => 'Landscaping & Gardens' ),
 		);
 
-		$missing = \maz_heights_missing_menu_items( $desired, array( 'Extensions', 'Our work' ) );
-
-		$this->assertSame( array( array( 'title' => 'Roofing' ) ), $missing );
+		$this->assertSame( array( 4, 5 ), \maz_heights_duplicate_menu_item_ids( $items ) );
 	}
 
-	public function test_missing_menu_items_returns_everything_when_menu_is_empty(): void {
-		$desired = array( array( 'title' => 'Extensions' ), array( 'title' => 'Roofing' ) );
+	public function test_duplicate_menu_item_ids_returns_nothing_when_all_unique(): void {
+		$items = array(
+			array( 'id' => 1, 'title' => 'Extensions' ),
+			array( 'id' => 2, 'title' => 'Roofing' ),
+		);
 
-		$this->assertSame( $desired, \maz_heights_missing_menu_items( $desired, array() ) );
+		$this->assertSame( array(), \maz_heights_duplicate_menu_item_ids( $items ) );
 	}
 
-	public function test_missing_menu_items_returns_nothing_when_all_present(): void {
-		$desired = array( array( 'title' => 'Extensions' ) );
+	public function test_bulk_seeding_flag_defaults_to_false_and_can_be_toggled(): void {
+		\maz_heights_set_bulk_seeding( false );
+		$this->assertFalse( \maz_heights_is_bulk_seeding() );
 
-		$this->assertSame( array(), \maz_heights_missing_menu_items( $desired, array( 'Extensions', 'Roofing' ) ) );
+		\maz_heights_set_bulk_seeding( true );
+		$this->assertTrue( \maz_heights_is_bulk_seeding() );
+
+		// Leave it clean for any other test that runs in this process.
+		\maz_heights_set_bulk_seeding( false );
 	}
 }

@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'MAZ_HEIGHTS_SEED_OPTION', 'maz_heights_seeded_version' );
-define( 'MAZ_HEIGHTS_SEED_VERSION', '2' );
+define( 'MAZ_HEIGHTS_SEED_VERSION', '3' );
 
 /**
  * The default services, projects and testimonials, matching the copy
@@ -275,6 +275,7 @@ function maz_heights_get_post_id_by_slug( $post_type, $slug ) {
  */
 function maz_heights_seed_content() {
 	update_option( MAZ_HEIGHTS_SEED_OPTION, MAZ_HEIGHTS_SEED_VERSION );
+	maz_heights_set_bulk_seeding( true );
 
 	$post_type_map = array(
 		'services'     => 'maz_service',
@@ -311,7 +312,33 @@ function maz_heights_seed_content() {
 		}
 	}
 
+	maz_heights_set_bulk_seeding( false );
 	maz_heights_sync_services_navigation();
+}
+
+/**
+ * Whether a bulk seed run (maz_heights_seed_content()) is currently in
+ * progress. Backs a re-entrancy guard: inserting a service inside that
+ * bulk loop fires `save_post_maz_service` for each one immediately
+ * (WordPress hooks run synchronously), which would otherwise trigger
+ * maz_heights_sync_services_navigation() once per service, partway
+ * through the loop, on an incomplete set of services each time — see
+ * maz_heights_sync_navigation_on_service_save(), which checks this and
+ * backs off while true, leaving the single sync at the end of
+ * maz_heights_seed_content() to do that work exactly once, against the
+ * complete set.
+ *
+ * @param bool $in_progress
+ */
+function maz_heights_set_bulk_seeding( $in_progress ) {
+	$GLOBALS['maz_heights_bulk_seeding'] = (bool) $in_progress;
+}
+
+/**
+ * @return bool
+ */
+function maz_heights_is_bulk_seeding() {
+	return ! empty( $GLOBALS['maz_heights_bulk_seeding'] );
 }
 
 /**
@@ -388,21 +415,31 @@ function maz_heights_sync_service_landing_pages() {
 /**
  * The "Primary Navigation" menu's desired items, in display order.
  *
+ * Services nest under a single "Services" item rather than sitting in
+ * the nav as one entry each — with 3 that read fine flat, but the same
+ * layout with 8+ is exactly the cluttered, hard-to-scan nav this was
+ * built to avoid, and it would only keep growing as more categories
+ * get added. "Services" itself still links straight to the homepage
+ * section (so a click always goes somewhere useful even before anyone
+ * discovers the dropdown); the individual services are its children
+ * and, on hover/focus, reveal the direct link to each one's own page.
+ * This mirrors maz_heights_fallback_nav_items() (inc/nav-fallback.php)
+ * in spirit — Extensions/Kitchens/Bathrooms there all point at the one
+ * #services anchor too — just carried through consistently instead of
+ * abandoned the moment each service got a real page of its own.
+ *
  * Takes the service list as a plain argument (rather than querying
  * `maz_service` posts itself) purely so it stays unit-testable without
  * a database — both real callers pass it real, live posts (mapped down
  * to just their title). A service is only included once its landing
- * page exists (i.e. it has an entry in $service_page_ids); this
- * mirrors maz_heights_fallback_nav_items() (inc/nav-fallback.php) but
- * points at each service's real page instead of the homepage's
- * #services anchor, now that those pages exist.
+ * page exists (i.e. it has an entry in $service_page_ids).
  *
  * @param array<int,array{title:string}> $services         Services in display order, each needing only a 'title'.
  * @param array<string,int>              $service_page_ids Service slug => page ID, from maz_heights_sync_service_landing_pages().
- * @return array<int,array<string,mixed>> wp_update_nav_menu_item()-shaped item specs, in menu order.
+ * @return array<int,array<string,mixed>> wp_update_nav_menu_item()-shaped item specs, in menu order; a "Services" item carries its children under a `children` key in the same shape.
  */
 function maz_heights_primary_menu_items( array $services, array $service_page_ids ) {
-	$items = array();
+	$children = array();
 
 	foreach ( $services as $service ) {
 		$slug = sanitize_title( $service['title'] );
@@ -411,11 +448,22 @@ function maz_heights_primary_menu_items( array $services, array $service_page_id
 			continue;
 		}
 
-		$items[] = array(
+		$children[] = array(
 			'title'     => $service['title'],
 			'type'      => 'post_type',
 			'object'    => 'page',
 			'object_id' => $service_page_ids[ $slug ],
+		);
+	}
+
+	$items = array();
+
+	if ( $children ) {
+		$items[] = array(
+			'title'    => 'Services',
+			'type'     => 'custom',
+			'url'      => home_url( '/#services' ),
+			'children' => $children,
 		);
 	}
 
@@ -455,37 +503,106 @@ function maz_heights_should_assign_primary_menu( array $existing_locations ) {
 }
 
 /**
- * Which of the desired menu items aren't in the menu yet, matched by
- * title.
+ * Normalise a menu item title for comparison.
  *
- * Matching on title rather than object ID keeps this simple and
- * catches the common case (a newly seeded service isn't in the menu
- * yet) without needing to inspect every existing item's type/object.
- * The trade-off: if an admin deliberately removed, say, "Extensions"
- * from the menu, a later sync that still considers Extensions desired
- * will add it back rather than respect the removal. Documented here
- * rather than silently assumed away.
+ * WordPress nav menu items round-trip a title like "Landscaping &
+ * Gardens" through several storage/rendering layers, and titles
+ * containing `&` (or other characters `wp_specialchars_decode()`
+ * touches) don't reliably come back byte-for-byte identical to what
+ * was passed to `wp_update_nav_menu_item()` — sometimes as `&`,
+ * sometimes as `&#038;`/`&amp;`. Comparing raw strings then never
+ * finds a match for that title, so maz_heights_sync_primary_menu()
+ * treats it as missing forever and a duplicate gets added on every
+ * single sync. Decoding both sides before comparing (here, and in
+ * maz_heights_duplicate_menu_item_ids() for cleaning up ones already
+ * created that way) makes the comparison immune to which encoded form
+ * either side happens to be in.
  *
- * @param array<int,array<string,mixed>> $desired_items   From maz_heights_primary_menu_items().
- * @param string[]                       $existing_titles Titles already in the menu.
- * @return array<int,array<string,mixed>>
+ * Matching on title at all (rather than object ID) is itself a
+ * trade-off: if an admin deliberately removed, say, "Prices" from the
+ * menu, a later sync that still considers it desired will add it back
+ * rather than respect the removal. Documented here rather than
+ * silently assumed away.
+ *
+ * @param string $title
+ * @return string
  */
-function maz_heights_missing_menu_items( array $desired_items, array $existing_titles ) {
-	return array_values( array_filter( $desired_items, static function ( $item ) use ( $existing_titles ) {
-		return ! in_array( $item['title'], $existing_titles, true );
-	} ) );
+function maz_heights_normalize_menu_title( $title ) {
+	return trim( wp_specialchars_decode( (string) $title, ENT_QUOTES ) );
+}
+
+/**
+ * Which menu item IDs are redundant duplicates (by normalised title),
+ * keeping the first occurrence of each title and flagging the rest.
+ *
+ * Exists to clean up duplicates already created by the title-encoding
+ * mismatch maz_heights_normalize_menu_title() now guards against —
+ * without this, an already-affected site's menu stays duplicated
+ * forever even once the code stops creating new ones.
+ *
+ * @param array<int,array{id:int,title:string}> $items Menu items in their current order.
+ * @return int[] IDs to delete.
+ */
+function maz_heights_duplicate_menu_item_ids( array $items ) {
+	$seen       = array();
+	$duplicates = array();
+
+	foreach ( $items as $item ) {
+		$key = maz_heights_normalize_menu_title( $item['title'] );
+
+		if ( isset( $seen[ $key ] ) ) {
+			$duplicates[] = $item['id'];
+			continue;
+		}
+
+		$seen[ $key ] = true;
+	}
+
+	return $duplicates;
+}
+
+/**
+ * Delete any duplicate items (by normalised title) from a nav menu.
+ *
+ * @param int $menu_id Nav menu term ID.
+ */
+function maz_heights_dedupe_menu_items( $menu_id ) {
+	$items = wp_get_nav_menu_items( $menu_id );
+
+	if ( ! $items ) {
+		return;
+	}
+
+	$simple = array_map( static function ( $item ) {
+		return array( 'id' => $item->ID, 'title' => $item->title );
+	}, $items );
+
+	foreach ( maz_heights_duplicate_menu_item_ids( $simple ) as $item_id ) {
+		wp_delete_post( $item_id, true );
+	}
 }
 
 /**
  * Ensure a "Primary Menu" exists, is assigned to the `primary` theme
- * location, and contains every currently-desired item.
+ * location, and contains every currently-desired item, correctly
+ * nested.
  *
  * On a fresh site this creates the menu, adds every item and assigns
- * it. On a site that already has something assigned to `primary`
- * (whether this function assigned it earlier, or an admin built their
- * own), it adds whatever's newly missing — e.g. a service category
- * added since — to that existing menu, leaving its current items,
- * order and any manual additions alone.
+ * it. On a site that already has something assigned to `primary`, it
+ * adds whatever's newly missing — e.g. a service category added since
+ * — to that existing menu, leaving its current top-level items, their
+ * order, and any manual additions alone.
+ *
+ * The one deliberate exception is a service (a `children` entry) that
+ * already exists in the menu but not under the right parent — e.g. a
+ * site synced before services were grouped under "Services" has each
+ * one sitting loose at the top level. Rather than leave it there
+ * forever (title-matching alone would: it's not "missing"), it's
+ * moved under the correct parent and its type/link data re-asserted.
+ * This is safe specifically because these items are always
+ * theme-generated with predictable content, never something typed
+ * freehand — reparenting can't clobber an admin's own wording the way
+ * blindly overwriting a top-level item's title or link could.
  *
  * @param array<int,array<string,mixed>> $desired_items From maz_heights_primary_menu_items().
  */
@@ -504,32 +621,116 @@ function maz_heights_sync_primary_menu( array $desired_items ) {
 		set_theme_mod( 'nav_menu_locations', $locations );
 	} else {
 		$menu_id = $locations['primary'];
+		// A menu that already existed may carry duplicates from before
+		// maz_heights_normalize_menu_title() started guarding against
+		// them; a freshly created one above can't have any yet.
+		maz_heights_dedupe_menu_items( $menu_id );
 	}
 
-	$existing_items  = wp_get_nav_menu_items( $menu_id );
-	$existing_titles = $existing_items ? wp_list_pluck( $existing_items, 'title' ) : array();
-	$missing_items   = maz_heights_missing_menu_items( $desired_items, $existing_titles );
-	$position        = $existing_items ? count( $existing_items ) : 0;
+	$existing_items = wp_get_nav_menu_items( $menu_id );
+	$position       = $existing_items ? count( $existing_items ) : 0;
 
-	foreach ( $missing_items as $item ) {
-		++$position;
-
-		$args = array(
-			'menu-item-title'    => $item['title'],
-			'menu-item-status'   => 'publish',
-			'menu-item-position' => $position,
-			'menu-item-type'     => $item['type'],
+	// Normalised title => {id, parent_id}, for every existing item
+	// (not just top-level ones) — used both to skip what already
+	// exists and, for children specifically, to notice one sitting
+	// under the wrong (or no) parent.
+	$existing_by_title = array();
+	foreach ( (array) $existing_items as $existing_item ) {
+		$existing_by_title[ maz_heights_normalize_menu_title( $existing_item->title ) ] = array(
+			'id'        => (int) $existing_item->ID,
+			'parent_id' => (int) $existing_item->menu_item_parent,
 		);
+	}
 
-		if ( 'custom' === $item['type'] ) {
-			$args['menu-item-url'] = $item['url'];
-		} else {
-			$args['menu-item-object']    = $item['object'];
-			$args['menu-item-object-id'] = $item['object_id'] ?? 0;
+	$top_level_items = array_map( static function ( $item ) {
+		unset( $item['children'] );
+		return $item;
+	}, $desired_items );
+
+	$parent_ids_by_title = array();
+
+	foreach ( $top_level_items as $item ) {
+		$key = maz_heights_normalize_menu_title( $item['title'] );
+
+		if ( isset( $existing_by_title[ $key ] ) ) {
+			$parent_ids_by_title[ $key ] = $existing_by_title[ $key ]['id'];
+			continue;
 		}
 
-		wp_update_nav_menu_item( $menu_id, 0, $args );
+		++$position;
+		$new_id = maz_heights_upsert_menu_item( $menu_id, $item, $position );
+
+		if ( $new_id ) {
+			$parent_ids_by_title[ $key ] = $new_id;
+			$existing_by_title[ $key ]   = array( 'id' => $new_id, 'parent_id' => 0 );
+		}
 	}
+
+	foreach ( $desired_items as $item ) {
+		if ( empty( $item['children'] ) ) {
+			continue;
+		}
+
+		$parent_id = $parent_ids_by_title[ maz_heights_normalize_menu_title( $item['title'] ) ] ?? 0;
+
+		if ( ! $parent_id ) {
+			continue; // Parent failed to create; leave children for the next sync.
+		}
+
+		$child_position = 0;
+
+		foreach ( $item['children'] as $child ) {
+			++$child_position;
+			$child_key = maz_heights_normalize_menu_title( $child['title'] );
+			$existing  = $existing_by_title[ $child_key ] ?? null;
+
+			if ( $existing && (int) $existing['parent_id'] === $parent_id ) {
+				continue; // Already exactly where it should be.
+			}
+
+			++$position;
+			maz_heights_upsert_menu_item( $menu_id, $child, $child_position, $parent_id, $existing['id'] ?? 0 );
+		}
+	}
+}
+
+/**
+ * Create or fully update a single nav menu item.
+ *
+ * WordPress's `wp_update_nav_menu_item()` isn't a partial update: any
+ * field left out of `$menu_item_data` resets to a generic default
+ * (empty title, type 'custom', etc.) rather than keeping the existing
+ * item's current value. So moving an existing item to a new parent
+ * means resending its full title/type/link data too, not just the new
+ * `menu-item-parent-id` — passing `$menu_item_db_id` here is what
+ * makes this an update-in-place instead of creating a new item.
+ *
+ * @param int   $menu_id          Nav menu term ID.
+ * @param array $item             Item spec: title, type, plus (for 'custom') url or (otherwise) object/object_id.
+ * @param int   $position         1-based position among its siblings.
+ * @param int   $parent_id        Parent menu item ID, or 0 for a top-level item.
+ * @param int   $menu_item_db_id  Existing menu item post ID to update, or 0 to create a new one.
+ * @return int The item's ID (new or existing), or 0 on failure.
+ */
+function maz_heights_upsert_menu_item( $menu_id, array $item, $position, $parent_id = 0, $menu_item_db_id = 0 ) {
+	$args = array(
+		'menu-item-title'     => $item['title'],
+		'menu-item-status'    => 'publish',
+		'menu-item-position'  => $position,
+		'menu-item-type'      => $item['type'],
+		'menu-item-parent-id' => $parent_id,
+	);
+
+	if ( 'custom' === $item['type'] ) {
+		$args['menu-item-url'] = $item['url'];
+	} else {
+		$args['menu-item-object']    = $item['object'];
+		$args['menu-item-object-id'] = $item['object_id'] ?? 0;
+	}
+
+	$result = wp_update_nav_menu_item( $menu_id, $menu_item_db_id, $args );
+
+	return is_wp_error( $result ) ? 0 : (int) $result;
 }
 
 /**
@@ -542,6 +743,13 @@ function maz_heights_sync_primary_menu( array $desired_items ) {
  * @param WP_Post $post    Post object.
  */
 function maz_heights_sync_navigation_on_service_save( $post_id, $post ) {
+	if ( maz_heights_is_bulk_seeding() ) {
+		// maz_heights_seed_content() will run the sync itself, once,
+		// after every service in this batch is inserted — see
+		// maz_heights_is_bulk_seeding()'s docblock.
+		return;
+	}
+
 	if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 		return;
 	}
