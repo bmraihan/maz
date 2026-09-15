@@ -23,3 +23,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! defined( 'OBJECT' ) ) {
 	define( 'OBJECT', 'OBJECT' );
 }
+
+// Normally defined in functions.php, which test files deliberately
+// don't require (it pulls in the whole theme at once); defined here
+// instead since inc/setup.php's maz_heights_asset_version() reads
+// MAZ_HEIGHTS_DIR directly, and points at the real theme root so that
+// function can be tested against real files (assets/css/style.css,
+// this bootstrap file itself, etc.) rather than a fake path.
+if ( ! defined( 'MAZ_HEIGHTS_DIR' ) ) {
+	define( 'MAZ_HEIGHTS_DIR', dirname( __DIR__, 2 ) );
+}
+if ( ! defined( 'MAZ_HEIGHTS_VERSION' ) ) {
+	define( 'MAZ_HEIGHTS_VERSION', '1.0.0' );
+}

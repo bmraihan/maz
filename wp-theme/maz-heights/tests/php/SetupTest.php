@@ -52,4 +52,46 @@ final class SetupTest extends TestCase {
 		$this->assertStringContainsString( 'IBM+Plex+Sans', $url );
 		$this->assertStringContainsString( 'IBM+Plex+Mono', $url );
 	}
+
+	/**
+	 * Regression test: the enqueued stylesheet/script version was a
+	 * hard-coded constant that never got bumped across several real
+	 * CSS/JS changes, so browsers (and any host/CDN cache) kept serving
+	 * a stale cached copy at the same URL indefinitely — a reported
+	 * CSS fix that looked correct in the repo but never visibly landed
+	 * for site visitors. Using the file's own mtime means every actual
+	 * content change changes the enqueued `?ver=`, with nothing to
+	 * remember to bump by hand.
+	 */
+	public function test_asset_version_matches_the_files_actual_mtime(): void {
+		$relative_path = '/tests/php/bootstrap.php';
+
+		$this->assertSame(
+			(string) filemtime( MAZ_HEIGHTS_DIR . $relative_path ),
+			\maz_heights_asset_version( $relative_path )
+		);
+	}
+
+	public function test_asset_version_changes_when_the_file_changes(): void {
+		$tmp_relative = '/tests/php/.tmp-asset-version-test.css';
+		$tmp_path     = MAZ_HEIGHTS_DIR . $tmp_relative;
+
+		file_put_contents( $tmp_path, 'body{}' );
+		touch( $tmp_path, time() - 100 );
+		$before = \maz_heights_asset_version( $tmp_relative );
+
+		touch( $tmp_path, time() );
+		$after = \maz_heights_asset_version( $tmp_relative );
+
+		unlink( $tmp_path );
+
+		$this->assertNotSame( $before, $after );
+	}
+
+	public function test_asset_version_falls_back_to_the_version_constant_when_file_missing(): void {
+		$this->assertSame(
+			MAZ_HEIGHTS_VERSION,
+			\maz_heights_asset_version( '/assets/css/this-file-does-not-exist.css' )
+		);
+	}
 }

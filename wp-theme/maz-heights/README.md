@@ -92,6 +92,16 @@ Heights Website.dc.html`, `chats/chat1.md`).
   only package registries, so real stock photos couldn't be fetched.
   Upload a featured image to any Service/Project post in wp-admin and
   it's used automatically instead.
+- **CSS/JS cache-busting is automatic**: `assets/css/style.css` and
+  `assets/js/*.js` are enqueued with the file's own last-modified time
+  as the version string (`maz_heights_asset_version()` in
+  `inc/setup.php`), not a hand-maintained constant. That constant
+  existed and was never bumped across several real style updates
+  earlier in development — a fix that was genuinely deployed still
+  didn't visibly reach a browser, because nothing told it (or a
+  host/CDN cache in front of it) that the file had changed. Nothing to
+  remember on future changes; every real edit changes the enqueued
+  URL by itself.
 
 ## Requirements
 

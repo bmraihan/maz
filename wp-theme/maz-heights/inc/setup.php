@@ -93,14 +93,37 @@ function maz_heights_setup() {
 add_action( 'after_setup_theme', 'maz_heights_setup' );
 
 /**
+ * Cache-busting version string for a theme asset: the file's own last
+ * modified time, so the enqueued URL's `?ver=` changes automatically
+ * whenever the file's contents change on disk — including this file's
+ * own updates delivered via SFTP, which touch mtimes even when nobody
+ * bumps MAZ_HEIGHTS_VERSION by hand.
+ *
+ * Without this, a static version constant that never gets bumped (as
+ * happened here across several real CSS/JS updates) means browsers —
+ * and any host-side or CDN caching — have no signal the file changed
+ * and keep serving their cached copy indefinitely at that same URL,
+ * so a deploy can succeed on the server while every visitor keeps
+ * seeing old CSS/JS until they hard-refresh.
+ *
+ * @param string $relative_path Path from the theme root, e.g. '/assets/css/style.css'.
+ * @return string
+ */
+function maz_heights_asset_version( $relative_path ) {
+	$file = MAZ_HEIGHTS_DIR . $relative_path;
+
+	return file_exists( $file ) ? (string) filemtime( $file ) : MAZ_HEIGHTS_VERSION;
+}
+
+/**
  * Enqueue theme styles and scripts.
  */
 function maz_heights_scripts() {
 	wp_enqueue_style( 'maz-heights-fonts', maz_heights_google_fonts_url(), array(), null );
-	wp_enqueue_style( 'maz-heights-style', MAZ_HEIGHTS_URI . '/assets/css/style.css', array(), MAZ_HEIGHTS_VERSION );
+	wp_enqueue_style( 'maz-heights-style', MAZ_HEIGHTS_URI . '/assets/css/style.css', array(), maz_heights_asset_version( '/assets/css/style.css' ) );
 
-	wp_enqueue_script( 'maz-heights-quote-form', MAZ_HEIGHTS_URI . '/assets/js/quote-form.js', array(), MAZ_HEIGHTS_VERSION, true );
-	wp_enqueue_script( 'maz-heights-main', MAZ_HEIGHTS_URI . '/assets/js/main.js', array( 'maz-heights-quote-form' ), MAZ_HEIGHTS_VERSION, true );
+	wp_enqueue_script( 'maz-heights-quote-form', MAZ_HEIGHTS_URI . '/assets/js/quote-form.js', array(), maz_heights_asset_version( '/assets/js/quote-form.js' ), true );
+	wp_enqueue_script( 'maz-heights-main', MAZ_HEIGHTS_URI . '/assets/js/main.js', array( 'maz-heights-quote-form' ), maz_heights_asset_version( '/assets/js/main.js' ), true );
 
 	wp_localize_script( 'maz-heights-quote-form', 'mazHeightsQuoteForm', array(
 		'endpoint' => esc_url_raw( maz_heights_form_endpoint() ),
