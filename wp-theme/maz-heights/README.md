@@ -47,19 +47,15 @@ Heights Website.dc.html`, `chats/chat1.md`).
   and archive (`archive-maz_project.php`) — the "Full case study →" and
   "All N projects →" links in the design go somewhere real.
 - **Primary navigation menu** is a real, editable WordPress menu
-  ("Primary Menu") assigned to the header's nav location, collapsed
-  behind a single **☰ Menu** button — hovering it (or tabbing to it
-  with a keyboard) reveals a panel with all four top-level items:
-  **Services ▾** (itself a flyout of every service, each linking to
-  its real page), **Our work**, **Process**, **Prices**. The header
-  stays compact no matter how many services exist, rather than
-  spelling every one out inline (that looked fine at 3, but turned
-  into a wrapping wall of text once more categories were added — see
-  the fix further down). Note this is hover/focus-only, by design, with
-  no JS fallback: on a touch screen a tap on "☰ Menu" won't open the
-  panel the way a mouse hover does — worth knowing before launch, and
-  easy to add a tap-to-toggle enhancement later if it turns out to
-  matter for mobile visitors. It's kept in sync
+  ("Primary Menu") assigned to the header's nav location, shown as a
+  plain, always-visible top bar with exactly four items — **Services ▾**,
+  **Our work**, **Process**, **Prices** — no matter how many services
+  exist. "Services ▾" is a simple two-level dropdown: hover or focus it
+  to reveal every service underneath, each linking to its real page.
+  (An earlier build tried collapsing the whole bar behind a "☰ Menu"
+  toggle; that added a layer of indirection nobody asked for and made
+  the header harder to scan, so it's back to this simpler shape.) It's
+  kept in sync
   automatically (on first activation, and again every time a service
   is published) rather than only ever built once: a menu item or
   landing page missing for any published service gets added, while

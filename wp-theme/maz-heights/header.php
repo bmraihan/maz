@@ -52,22 +52,14 @@ $maz_business = maz_heights_business_info();
 		</a>
 
 		<nav class="site-nav" aria-label="<?php esc_attr_e( 'Primary', 'maz-heights' ); ?>">
-			<div class="site-nav__menu-wrap">
-				<button type="button" class="site-nav__toggle" aria-haspopup="true">
-					<span class="site-nav__toggle-icon" aria-hidden="true">&#9776;</span>
-					<?php esc_html_e( 'Menu', 'maz-heights' ); ?>
-				</button>
-				<div class="site-nav__panel">
-					<?php
-					wp_nav_menu( array(
-						'theme_location' => 'primary',
-						'container'      => false,
-						'items_wrap'     => '<div class="site-nav__links">%3$s</div>',
-						'fallback_cb'    => 'maz_heights_fallback_nav_menu',
-					) );
-					?>
-				</div>
-			</div>
+			<?php
+			wp_nav_menu( array(
+				'theme_location' => 'primary',
+				'container'      => false,
+				'items_wrap'     => '<div class="site-nav__links">%3$s</div>',
+				'fallback_cb'    => 'maz_heights_fallback_nav_menu',
+			) );
+			?>
 		</nav>
 
 		<div class="site-header__contact">

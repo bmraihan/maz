@@ -173,53 +173,13 @@ button { font: inherit; cursor: pointer; }
 	color: var(--text-muted);
 	margin-top: 5px;
 }
-.site-nav { position: relative; flex: none; }
-
-/* The whole nav collapses behind one "☰ Menu" toggle; hovering (or
-   tabbing into) the wrapper reveals the panel — no JS, matching the
-   Services flyout inside it, so both share one interaction model.
-   Known trade-off: hover-only means there's no tap-to-open fallback
-   on touch devices, where a link inside becomes reachable only via
-   whatever the browser does with a first tap on a hover target. */
-.site-nav__menu-wrap { position: relative; }
-.site-nav__toggle {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	background: none;
-	border: 1px solid var(--border-light);
-	padding: 10px 16px;
-	font: 600 14px var(--font-body);
-	color: var(--graphite);
-	cursor: pointer;
-}
-.site-nav__toggle:hover { border-color: var(--text-faint); }
-.site-nav__toggle-icon { font-size: 15px; line-height: 1; }
-
-.site-nav__panel {
-	display: none;
-	position: absolute;
-	top: 100%;
-	left: 50%;
-	transform: translateX(-50%);
-	margin-top: 8px;
-	background: #fff;
-	border: 1px solid var(--border-light);
-	box-shadow: 0 16px 32px rgba(16, 24, 32, .16);
-	padding: 10px;
-	min-width: 200px;
-	z-index: 40;
-}
-.site-nav__menu-wrap:hover > .site-nav__panel,
-.site-nav__menu-wrap:focus-within > .site-nav__panel {
-	display: block;
-}
-
+.site-nav { flex: 1 1 auto; min-width: 0; }
 .site-nav__links {
 	display: flex;
-	flex-direction: column;
-	align-items: stretch;
-	gap: 2px;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 28px;
+	justify-content: center;
 	font: 500 14px var(--font-body);
 	list-style: none;
 	margin: 0;
@@ -227,22 +187,16 @@ button { font: inherit; cursor: pointer; }
 }
 /* wp_nav_menu()'s real output is <li><a>…</a></li> — a fallback_cb
    without a real menu assigned yet renders bare <a> tags instead (see
-   inc/nav-fallback.php); both need to lay out identically in this
-   column, and neither should show a browser default list-item marker. */
-.site-nav__links > li { list-style: none; margin: 0; position: relative; width: 100%; }
-.site-nav__links a {
-	color: var(--text-dark);
-	display: block;
-	padding: 10px 12px;
-	white-space: nowrap;
-}
-.site-nav__links > li > a:hover { background: var(--stone); color: var(--brick); }
+   inc/nav-fallback.php); both need to lay out identically in this flex
+   row, and neither should show a browser default list-item marker. */
+.site-nav__links > li { list-style: none; margin: 0; position: relative; display: flex; align-items: center; }
+.site-nav__links a { color: var(--text-dark); display: block; padding: 2px 0; }
 
-/* "Services" flyout, nested one level inside the already-open panel */
+/* "Services" dropdown */
 .site-nav__links .menu-item-has-children > a::after {
 	content: '▾';
 	display: inline-block;
-	margin-left: 6px;
+	margin-left: 5px;
 	font-size: 10px;
 	color: var(--text-faint);
 }
@@ -251,9 +205,9 @@ button { font: inherit; cursor: pointer; }
 	margin: 0;
 	padding: 8px;
 	position: absolute;
-	top: 0;
-	left: 100%;
-	margin-left: 4px;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
 	background: #fff;
 	border: 1px solid var(--border-light);
 	box-shadow: 0 12px 28px rgba(16, 24, 32, .14);
@@ -261,7 +215,7 @@ button { font: inherit; cursor: pointer; }
 	display: none;
 	flex-direction: column;
 	gap: 1px;
-	z-index: 41;
+	z-index: 30;
 }
 .site-nav__links li:hover > .sub-menu,
 .site-nav__links li:focus-within > .sub-menu {
@@ -561,22 +515,14 @@ button { font: inherit; cursor: pointer; }
 		gap: 8px;
 	}
 	.site-header__inner { justify-content: center; }
-	/* The centred Menu panel can overflow off-screen once the header no
-	   longer spans full width; anchor to the toggle's own left edge and
-	   cap the width so it can't push past the viewport. */
-	.site-nav__panel {
+	.site-nav__links { justify-content: flex-start; }
+	/* Centred dropdowns can overflow off-screen once the nav no longer
+	   spans the full header width; anchor to the item's own left edge
+	   instead, and cap the width so it can't push past the viewport. */
+	.site-nav__links .sub-menu {
 		left: 0;
 		transform: none;
 		max-width: calc(100vw - 40px);
-	}
-	/* A side flyout for "Services" has nowhere to go at this width —
-	   let it expand inline underneath instead, like an accordion. */
-	.site-nav__links .sub-menu {
-		position: static;
-		margin: 4px 0 4px 12px;
-		box-shadow: none;
-		border: none;
-		background: var(--stone);
 	}
 }
 
